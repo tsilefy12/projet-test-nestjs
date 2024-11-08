@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_HOST=mariadb
+      - DATABASE_PORT=3307
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=
+      - DATABASE_NAME=articles
+      - JWT_SECRET=secretkey
+    depends_on:
+      - mariadb
+    networks:
+      - app-network
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    networks:
+      - app-network
+
+  mariadb:
+    image: mariadb:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: articles
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./articles.sql:/docker-entrypoint-initdb.d/articles.sql:ro
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
